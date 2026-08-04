@@ -27,7 +27,19 @@ cp .env.example .env   # 填入 OPENAI_API_KEY，按需改 OPENAI_MODEL / OPENAI
 
 ```
 demo_agent/
-├── tools.py   # 自定义工具定义（@tool 装饰器）
-├── agent.py   # ChatOpenAI + create_react_agent 构建智能体
-└── main.py    # 命令行入口（单次提问 / 交互式）
+├── tools.py             # 自定义工具定义（@tool 装饰器）
+├── agent.py             # ChatOpenAI + create_react_agent 构建智能体
+└── main.py              # 命令行入口（单次提问 / 交互式）
+mcp_demo_server.py       # 示例 MCP 服务器（weather-demo，stdio 传输）
 ```
+
+### 可选：启用 MCP 工具
+
+项目带了一个最小的 stdio MCP 服务器 `mcp_demo_server.py`（`get_weather` / `roll_dice` 两个演示工具）。在 `.env` 中配置 `MCP_SERVERS`（JSON）即可让智能体自动加载其工具：
+
+```bash
+# .env 中取消注释并填写，command 建议用 venv 里的 python 绝对路径
+MCP_SERVERS={"weather-demo": {"transport": "stdio", "command": "C:\\projects\\Blue-Ocean\\.venv\\Scripts\\python.exe", "args": ["mcp_demo_server.py"]}}
+```
+
+启动后智能体会打印 `已从 MCP 加载 2 个工具`，之后即可向它提问天气、掷骰子之类的问题。
