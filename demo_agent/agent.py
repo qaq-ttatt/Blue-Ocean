@@ -14,6 +14,9 @@ from demo_agent.tools import (
     random_choice,
     random_number,
     random_uuid,
+    regex_match,
+    regex_replace,
+    regex_search,
 )
 
 SYSTEM_PROMPT = (
@@ -21,6 +24,7 @@ SYSTEM_PROMPT = (
     "涉及算术运算时使用 calculator，询问时间/日期时使用 current_time，"
     "统计字数用 count_words，计算哈希摘要用 hash_text，base64 编解码用 base64_tool，"
     "生成随机数/随机选择/UUID 用 random_number / random_choice / random_uuid，"
+    "正则匹配/查找/替换用 regex_match / regex_search / regex_replace，"
     "涉及天气或掷骰子时使用 MCP 提供的工具。"
 )
 
@@ -77,6 +81,9 @@ async def build_agent(
         random_number,
         random_choice,
         random_uuid,
+        regex_match,
+        regex_search,
+        regex_replace,
     ]
 
     config = mcp_servers if mcp_servers is not None else _load_mcp_servers()

@@ -107,3 +107,30 @@ def random_choice(options: str) -> str:
 def random_uuid() -> str:
     """生成一个随机 UUID（版本 4），如 "550e8400-e29b-41d4-a716-446655440000"。"""
     return str(uuid.uuid4())
+
+
+@tool
+def regex_match(text: str, pattern: str) -> bool:
+    """判断 text 是否匹配正则 pattern（部分匹配即可），如 regex_match("abc123", r"[a-z]+\d+")。"""
+    try:
+        return re.search(pattern, text) is not None
+    except re.error as exc:
+        return f"正则表达式无效: {exc}"
+
+
+@tool
+def regex_search(text: str, pattern: str) -> list:
+    """用正则 pattern 在 text 中查找所有匹配的子串，如 regex_search("a1 b22 c333", r"[a-z]\d+")。"""
+    try:
+        return re.findall(pattern, text)
+    except re.error as exc:
+        return f"正则表达式无效: {exc}"
+
+
+@tool
+def regex_replace(text: str, pattern: str, replacement: str) -> str:
+    """用正则 pattern 在 text 中查找并替换为 replacement，替换所有匹配，如 regex_replace("a1 b2", r"\d", "#")。"""
+    try:
+        return re.sub(pattern, replacement, text)
+    except re.error as exc:
+        return f"正则表达式无效: {exc}"
