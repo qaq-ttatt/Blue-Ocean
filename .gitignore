@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# 本地会话历史（demo_agent 持久化生成）
+chat_history.json
