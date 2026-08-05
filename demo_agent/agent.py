@@ -13,6 +13,9 @@ from demo_agent.tools import (
     days_between,
     hash_text,
     is_prime,
+    random_choice,
+    random_number,
+    random_uuid,
     unit_convert,
 )
 
@@ -21,6 +24,7 @@ SYSTEM_PROMPT = (
     "涉及算术运算时使用 calculator，询问时间/日期或日期差时使用 current_time / days_between，"
     "统计字数用 count_words，计算哈希摘要用 hash_text，base64 编解码用 base64_tool，"
     "单位换算用 unit_convert，判断质数用 is_prime，"
+    "生成随机数/随机选择/UUID 用 random_number / random_choice / random_uuid，"
     "涉及天气、掷骰子、行情、汇率、名言或密码时使用 MCP 提供的工具。"
 )
 
@@ -77,6 +81,9 @@ async def build_agent(
         unit_convert,
         is_prime,
         days_between,
+        random_number,
+        random_choice,
+        random_uuid,
     ]
 
     config = mcp_servers if mcp_servers is not None else _load_mcp_servers()

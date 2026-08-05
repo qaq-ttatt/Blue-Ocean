@@ -19,9 +19,12 @@ python -m venv .venv
 cp .env.example .env   # 填入 OPENAI_API_KEY，按需改 OPENAI_MODEL / OPENAI_BASE_URL
 
 # 3. 运行
-.venv/Scripts/python -m demo_agent.main "帮我算一下 (123 + 45) * 2"
-.venv/Scripts/python -m demo_agent.main   # 不带参数则进入交互式对话
+.venv/Scripts/python -m demo_agent.main "帮我算一下 (123 + 45) * 2"  # 单次提问
+.venv/Scripts/python -m demo_agent.main        # 不带参数则进入交互式对话
+.venv/Scripts/python -m demo_agent.main -r     # 交互式对话，并恢复上次会话历史
 ```
+
+会话历史保存在根目录 `chat_history.json`（已加入 `.gitignore`）。
 
 ### 结构
 
