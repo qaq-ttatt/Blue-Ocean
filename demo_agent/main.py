@@ -4,14 +4,18 @@
     python -m demo_agent.main "帮我算一下 (123 + 45) * 2"   # 单次提问
     python -m demo_agent.main                              # 交互式对话
     python -m demo_agent.main -r                           # 交互式对话（恢复上次会话）
+    启用 MCP 工具：在 .env 中设置 MCP_SERVERS（JSON），见 .env.example
 """
 import argparse
+import asyncio
+from contextlib import suppress
 
 from dotenv import load_dotenv
 from langchain_core.load import dumps, loads
 from langchain_core.messages import AIMessage, AnyMessage
 
 from demo_agent.agent import build_agent
+from demo_agent.hooks import DebugCallbackHandler
 
 # 最多保留的历史消息条数（含中间的 ToolMessage 等），防止长对话超出上下文窗口
 MAX_HISTORY_MESSAGES = 20
@@ -32,7 +36,7 @@ def _trim_history(messages: list) -> list:
     return trimmed
 
 
-def _stream_chat(agent, messages: list) -> dict:
+async def _stream_chat(agent, messages: list) -> dict:
     """流式调用智能体：逐 token 打印 agent 回答，返回合并后的完整消息历史。
 
     stream_mode="messages" 返回 (消息块, 元数据) 序列；同一消息 id 的块
@@ -40,9 +44,10 @@ def _stream_chat(agent, messages: list) -> dict:
     """
     merged: dict[str, AnyMessage] = {}
     print("智能体: ", end="", flush=True)
-    for chunk, metadata in agent.stream(
+    async for chunk, metadata in agent.astream(
         {"messages": messages},
         stream_mode="messages",
+        config={"callbacks": [DebugCallbackHandler()]},
     ):
         # 只打印 agent 节点的文本增量；工具调用消息 content 为空，天然被跳过
         if metadata.get("langgraph_node") == "agent" and chunk.content and not chunk.tool_calls:
@@ -70,15 +75,14 @@ def _load_history() -> list:
         return []
 
 
-def _ask(agent, messages: list, question: str) -> None:
+async def _ask(agent, messages: list, question: str) -> None:
     """把问题追加到会话，流式回答，历史写回会话并持久化。"""
     messages.append(("user", question))
-    messages[:] = _trim_history(_stream_chat(agent, messages)["messages"])
+    messages[:] = _trim_history((await _stream_chat(agent, messages))["messages"])
     _save_history(messages)
-    print()
 
 
-def main() -> None:
+async def main() -> None:
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="Demo 智能体命令行入口")
@@ -86,11 +90,11 @@ def main() -> None:
     parser.add_argument("-r", "--resume", action="store_true", help="恢复上次会话历史")
     args = parser.parse_args()
 
-    agent = build_agent()
+    agent = await build_agent()
     messages: list = _load_history() if args.resume else []
 
     if args.question:
-        _ask(agent, messages, " ".join(args.question))
+        await _ask(agent, messages, " ".join(args.question))
         return
 
     if args.resume and messages:
@@ -106,8 +110,9 @@ def main() -> None:
             continue
         if question.lower() in {"exit", "quit", "q"}:
             break
-        _ask(agent, messages, question)
+        await _ask(agent, messages, question)
 
 
 if __name__ == "__main__":
-    main()
+    with suppress(KeyboardInterrupt):
+        asyncio.run(main())

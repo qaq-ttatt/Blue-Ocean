@@ -1,6 +1,9 @@
 """demo 智能体用到的自定义工具。"""
 import ast
+import base64
+import hashlib
 import operator
+import re
 from datetime import datetime
 
 from langchain_core.tools import tool
@@ -49,3 +52,33 @@ def _safe_eval(node: ast.AST) -> float:
 def current_time() -> str:
     """返回当前的本地日期与时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+@tool
+def count_words(text: str) -> int:
+    """统计一段文字的字数：英文单词按空格分词，中文按字符计数。"""
+    words = re.findall(r"[A-Za-z]+", text)
+    cjk = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
+    return len(words) + cjk
+
+
+@tool
+def hash_text(text: str, algorithm: str = "sha256") -> str:
+    """计算文本的哈希摘要，算法可选 sha256 / md5 / sha1。"""
+    try:
+        return hashlib.new(algorithm, text.encode("utf-8")).hexdigest()
+    except ValueError as exc:
+        return f"不支持的哈希算法: {exc}"
+
+
+@tool
+def base64_tool(text: str, mode: str = "encode") -> str:
+    """对文本做 base64 编码（mode=encode）或解码（mode=decode）。"""
+    try:
+        if mode == "encode":
+            return base64.b64encode(text.encode("utf-8")).decode("ascii")
+        if mode == "decode":
+            return base64.b64decode(text).decode("utf-8")
+    except Exception as exc:  # noqa: BLE001 - demo 场景直接返回错误信息给模型
+        return f"base64 {mode} 失败: {exc}"
+    return "mode 只能是 encode 或 decode"
