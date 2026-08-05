@@ -88,9 +88,15 @@ async def main() -> None:
     parser = argparse.ArgumentParser(description="Demo 智能体命令行入口")
     parser.add_argument("question", nargs="*", help="单次提问内容；缺省进入交互式对话")
     parser.add_argument("-r", "--resume", action="store_true", help="恢复上次会话历史")
+    parser.add_argument(
+        "-p",
+        "--preset",
+        default=None,
+        help="提示词预设，可选: default / 翻译专家 / 编程助手 / 写作助手（缺省用 OPENAI_PRESET 或 default）",
+    )
     args = parser.parse_args()
 
-    agent = await build_agent()
+    agent = await build_agent(preset=args.preset)
     messages: list = _load_history() if args.resume else []
 
     if args.question:
