@@ -3,7 +3,9 @@ import ast
 import base64
 import hashlib
 import operator
+import random
 import re
+import uuid
 from datetime import datetime
 
 from langchain_core.tools import tool
@@ -82,3 +84,26 @@ def base64_tool(text: str, mode: str = "encode") -> str:
     except Exception as exc:  # noqa: BLE001 - demo 场景直接返回错误信息给模型
         return f"base64 {mode} 失败: {exc}"
     return "mode 只能是 encode 或 decode"
+
+
+@tool
+def random_number(min_value: int = 1, max_value: int = 100) -> int:
+    """生成 [min_value, max_value] 区间内的随机整数，如 random_number(1, 6)。"""
+    if min_value > max_value:
+        return f"min_value 不能大于 max_value: {min_value} > {max_value}"
+    return random.randint(min_value, max_value)
+
+
+@tool
+def random_choice(options: str) -> str:
+    """从逗号分隔的选项里随机选一个，如 random_choice("石头,剪刀,布")。"""
+    items = [item.strip() for item in options.split(",") if item.strip()]
+    if not items:
+        return "选项不能为空，请用逗号分隔多个选项"
+    return random.choice(items)
+
+
+@tool
+def random_uuid() -> str:
+    """生成一个随机 UUID（版本 4），如 "550e8400-e29b-41d4-a716-446655440000"。"""
+    return str(uuid.uuid4())

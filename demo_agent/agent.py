@@ -11,12 +11,16 @@ from demo_agent.tools import (
     count_words,
     current_time,
     hash_text,
+    random_choice,
+    random_number,
+    random_uuid,
 )
 
 SYSTEM_PROMPT = (
     "你是一个乐于助人的助手。回答问题时可以调用工具："
     "涉及算术运算时使用 calculator，询问时间/日期时使用 current_time，"
     "统计字数用 count_words，计算哈希摘要用 hash_text，base64 编解码用 base64_tool，"
+    "生成随机数/随机选择/UUID 用 random_number / random_choice / random_uuid，"
     "涉及天气或掷骰子时使用 MCP 提供的工具。"
 )
 
@@ -64,7 +68,16 @@ async def build_agent(
         temperature=0,
     )
 
-    tools = [calculator, current_time, count_words, hash_text, base64_tool]
+    tools = [
+        calculator,
+        current_time,
+        count_words,
+        hash_text,
+        base64_tool,
+        random_number,
+        random_choice,
+        random_uuid,
+    ]
 
     config = mcp_servers if mcp_servers is not None else _load_mcp_servers()
     if config:
