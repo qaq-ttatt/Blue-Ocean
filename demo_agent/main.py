@@ -92,7 +92,7 @@ async def main() -> None:
         "-p",
         "--preset",
         default=None,
-        help="提示词预设，可选: default / 翻译专家 / 编程助手 / 写作助手 / 数据分析师 / 英文助手 / 产品经理（缺省用 OPENAI_PRESET 或 default）",
+        help="提示词预设，可选: default / 翻译专家 / 编程助手 / 写作助手 / 数据分析师 / 英文助手 / 产品经理 / 客服 / 营销文案 / 教师 / 职业顾问（缺省用 OPENAI_PRESET 或 default）",
     )
     args = parser.parse_args()
 
