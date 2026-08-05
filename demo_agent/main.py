@@ -12,10 +12,14 @@ from contextlib import suppress
 from dotenv import load_dotenv
 
 from demo_agent.agent import build_agent
+from demo_agent.hooks import DebugCallbackHandler
 
 
 async def _ask(agent, question: str) -> None:
-    result = await agent.ainvoke({"messages": [("user", question)]})
+    result = await agent.ainvoke(
+        {"messages": [("user", question)]},
+        config={"callbacks": [DebugCallbackHandler()]},
+    )
     print("智能体:", result["messages"][-1].content)
     print()
 
