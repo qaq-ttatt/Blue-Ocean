@@ -10,14 +10,18 @@ from demo_agent.tools import (
     calculator,
     count_words,
     current_time,
+    days_between,
     hash_text,
+    is_prime,
+    unit_convert,
 )
 
 SYSTEM_PROMPT = (
     "你是一个乐于助人的助手。回答问题时可以调用工具："
-    "涉及算术运算时使用 calculator，询问时间/日期时使用 current_time，"
+    "涉及算术运算时使用 calculator，询问时间/日期或日期差时使用 current_time / days_between，"
     "统计字数用 count_words，计算哈希摘要用 hash_text，base64 编解码用 base64_tool，"
-    "涉及天气或掷骰子时使用 MCP 提供的工具。"
+    "单位换算用 unit_convert，判断质数用 is_prime，"
+    "涉及天气、掷骰子、行情、汇率、名言或密码时使用 MCP 提供的工具。"
 )
 
 
@@ -64,7 +68,16 @@ async def build_agent(
         temperature=0,
     )
 
-    tools = [calculator, current_time, count_words, hash_text, base64_tool]
+    tools = [
+        calculator,
+        current_time,
+        count_words,
+        hash_text,
+        base64_tool,
+        unit_convert,
+        is_prime,
+        days_between,
+    ]
 
     config = mcp_servers if mcp_servers is not None else _load_mcp_servers()
     if config:
