@@ -6,7 +6,7 @@ import operator
 import random
 import re
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from langchain_core.tools import tool
 
@@ -84,6 +84,54 @@ def base64_tool(text: str, mode: str = "encode") -> str:
     except Exception as exc:  # noqa: BLE001 - demo 场景直接返回错误信息给模型
         return f"base64 {mode} 失败: {exc}"
     return "mode 只能是 encode 或 decode"
+
+
+# 单位换算表：同一维度内的单位才能互相换算（基准单位系数）
+_UNIT_TABLES = {
+    "length": {"m": 1.0, "km": 1000.0, "cm": 0.01, "mm": 0.001},
+    "weight": {"kg": 1.0, "g": 0.001, "t": 1000.0, "lb": 0.45359237},
+    "volume": {"l": 1.0, "ml": 0.001},
+}
+
+
+@tool
+def unit_convert(value: float, from_unit: str, to_unit: str) -> str:
+    """换算长度/重量/容量单位，如 unit_convert(5, "km", "m") -> 5000.0。"""
+    f, t = from_unit.strip().lower(), to_unit.strip().lower()
+    for dim, table in _UNIT_TABLES.items():
+        if f in table and t in table:
+            return str(value * table[f] / table[t])
+        if f in table or t in table:
+            return f"单位 {f} 和 {t} 不属于同一维度"
+    return f"不支持的单位 {f} / {t}"
+
+
+@tool
+def is_prime(n: int) -> bool:
+    """判断一个整数是否为质数（>1 且只能被 1 和自身整除）。"""
+    if n < 2:
+        return False
+    if n in (2, 3):
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+
+@tool
+def days_between(date1: str, date2: str) -> int:
+    """计算两个日期（YYYY-MM-DD）相差的天数，返回 date2 - date1。"""
+    try:
+        d1 = date.fromisoformat(date1)
+        d2 = date.fromisoformat(date2)
+    except ValueError as exc:
+        return f"日期格式应为 YYYY-MM-DD: {exc}"
+    return (d2 - d1).days
 
 
 @tool
